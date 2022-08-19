@@ -1,3 +1,11 @@
 .chart-container {
     margin-bottom: 3rem;
 }
+
+#top-10-table {
+    font-size: 0.8em;
+}
+
+.top-10-table-container > h4 {
+    margin-top: 0.2em;
+}
