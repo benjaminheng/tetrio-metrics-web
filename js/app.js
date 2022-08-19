@@ -156,6 +156,9 @@ class Renderer {
         }
       ],
     };
+
+    // Remove loading indicator before rendering
+    document.getElementById("40l-over-time-container").innerHTML = "";
     let uplot = new uPlot(opts, this.data40lOverTime, document.getElementById("40l-over-time-container"));
   }
 
@@ -188,6 +191,9 @@ class Renderer {
         }
       ],
     };
+
+    // Remove loading indicator before rendering
+    document.getElementById("40l-personal-bests-container").innerHTML = "";
     let uplot = new uPlot(opts, this.dataPersonalBests, document.getElementById("40l-personal-bests-container"));
   }
 
