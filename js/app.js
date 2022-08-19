@@ -9,10 +9,11 @@ function onDocumentReady(fn) {
 class Renderer {
   constructor() {
     this.rawData = null;
+    this.legacyGamemode40lData = null;
     this.data40lOverTime = [[], []];
   }
 
-  async initData() {
+  async initGamemode40lData() {
     this.rawData = await this.getGamemode40lData();
 
     // Data is sorted by played_at descending. Iterate backwards because we
@@ -22,6 +23,39 @@ class Renderer {
       this.data40lOverTime[0].push(v.played_at);
       this.data40lOverTime[1].push(v.time);
     }
+  }
+
+  async initLegacyGamemode40lData() {
+    this.legacyGamemode40lData = await this.getLegacyGamemode40lData();
+    console.log("this.legacyGamemode40lData =", this.legacyGamemode40lData);
+  }
+
+  getLegacyGamemode40lData() {
+    return new Promise((resolve) => {
+      Papa.parse("https://raw.githubusercontent.com/benjaminheng/tetrio-metrics-archive/master/gamemode_40l_legacy.csv", {
+        download: true,
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          resolve(results.data);
+        },
+        transformHeader: (header) => {
+          if (header === "time_ms") {
+            return "time";
+          }
+          return header;
+        },
+        transform: (value, header) => {
+          if (header === "played_at") {
+            return Math.floor(Date.parse(value)/1000);
+          } else if (header === "time") {
+            return value / 1000; // Transform from milliseconds to seconds
+          }
+          return value;
+        },
+      })
+    });
   }
 
   getGamemode40lData() {
@@ -96,9 +130,10 @@ class Renderer {
 
 async function main() {
   const renderer = new Renderer();
-  await renderer.initData();
+  await renderer.initGamemode40lData();
   renderer.render40LOverTime();
   renderer.renderTotalGamesPlayed();
+  await renderer.initLegacyGamemode40lData();
 }
 
 onDocumentReady(main)
