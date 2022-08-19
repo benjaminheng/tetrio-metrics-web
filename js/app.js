@@ -88,13 +88,17 @@ class Renderer {
     };
     let uplot = new uPlot(opts, this.data40lOverTime, document.getElementById("40l-over-time-container"));
   }
+
+  renderTotalGamesPlayed() {
+    document.getElementById("total-games-played").innerHTML = this.rawData.length;
+  }
 }
 
 async function main() {
   const renderer = new Renderer();
   await renderer.initData();
   renderer.render40LOverTime();
-  renderer.render40LOverGamesPlayed();
+  renderer.renderTotalGamesPlayed();
 }
 
 onDocumentReady(main)
