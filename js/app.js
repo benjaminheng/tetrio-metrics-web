@@ -31,13 +31,30 @@ class Renderer {
 
   async initLegacyGamemode40lData() {
     this.legacyGamemode40lData = await this.getLegacyGamemode40lData();
-    //
-    // Data is sorted by played_at descending. Iterate backwards because we
-    // want to display the x-axis in ascending order instead.
-    for (let i=this.legacyGamemode40lData.length-1; i>=0; i--) {
-      const v = this.legacyGamemode40lData[i];
-      this.dataPersonalBests[0].push(v.played_at);
-      this.dataPersonalBests[1].push(v.time);
+
+    let best = null;
+
+    // Process legacy data, from before we started collecting data using
+    // tetrio-metrics.
+    if (this.legacyGamemode40lData.length > 0) {
+      // Data is sorted by played_at descending. Iterate backwards because we
+      // want to display the x-axis in ascending order instead.
+      for (let i=this.legacyGamemode40lData.length-1; i>=0; i--) {
+        const v = this.legacyGamemode40lData[i];
+        this.dataPersonalBests[0].push(v.played_at);
+        this.dataPersonalBests[1].push(v.time);
+      }
+      best = this.legacyGamemode40lData[0];
+    }
+
+    // Add personal bests from collected data using tetrio-metrics.
+    for (let i=this.gamemode40lData.length-1; i>=0; i--) {
+      const v = this.gamemode40lData[i];
+      if (v.time < best) {
+        this.dataPersonalBests[0].push(v.played_at);
+        this.dataPersonalBests[1].push(v.time);
+        best = v.time
+      }
     }
   }
 
