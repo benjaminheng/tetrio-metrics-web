@@ -10,21 +10,17 @@ class Renderer {
   constructor() {
     this.rawData = null;
     this.data40lOverTime = [[], []];
-    this.data40lOverGamesPlayed = [[], []];
   }
 
   async initData() {
     this.rawData = await this.getGamemode40lData();
 
-    let count = 1;
     // Data is sorted by played_at descending. Iterate backwards because we
     // want to display the x-axis in ascending order instead.
     for (let i=this.rawData.length-1; i>=0; i--) {
       const v = this.rawData[i];
       this.data40lOverTime[0].push(v.played_at);
       this.data40lOverTime[1].push(v.time);
-      this.data40lOverGamesPlayed[0].push(count++);
-      this.data40lOverGamesPlayed[1].push(v.time);
     }
   }
 
@@ -91,43 +87,6 @@ class Renderer {
       ],
     };
     let uplot = new uPlot(opts, this.data40lOverTime, document.getElementById("40l-over-time-container"));
-  }
-
-  render40LOverGamesPlayed() {
-    const { spline } = uPlot.paths;
-    let opts = {
-      title: "40L performance over games played",
-      id: "40l-over-games-played-chart",
-      width: 800,
-      height: 300,
-      scales: {
-        x: {
-          time: false,
-        },
-      },
-      axes: [
-        {},
-        {
-          values: (u, vals, space) => vals.map(v => v + 's'),
-        },
-      ],
-      series: [
-        {
-          label: "Game number",
-        },
-        {
-          show: true,
-          label: "Time",
-          value: (self, rawValue) => rawValue + "s",
-          stroke: "red",
-          width: 1,
-          drawStyle: null,
-          paths: spline(),
-        }
-      ],
-    };
-
-    let uplot = new uPlot(opts, this.data40lOverGamesPlayed, document.getElementById("40l-over-games-played-container"));
   }
 }
 
