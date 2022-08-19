@@ -8,11 +8,20 @@ function onDocumentReady(fn) {
 
 class Renderer {
   constructor() {
-    this.data = null;
+    this.rawData = null;
+    this.data40lOverTime = [[], []];
+    this.data40lOverGamesPlayed = [[], []];
   }
 
   async initData() {
-    this.data = await this.getGamemode40lData();
+    this.rawData = await this.getGamemode40lData();
+    for (let i=0; i<this.rawData.length; i++) {
+      const v = this.rawData[i];
+      this.data40lOverTime[0].push(v.played_at);
+      this.data40lOverTime[1].push(v.time);
+      this.data40lOverGamesPlayed[0].push(i+1);
+      this.data40lOverGamesPlayed[1].push(v.time);
+    }
   }
 
   getGamemode40lData() {
@@ -44,49 +53,36 @@ class Renderer {
   }
 
   render40LOverTime() {
-    const xAxis = [];
-    const yAxis = [];
-    for (const v of this.data) {
-      xAxis.push(v.played_at);
-      yAxis.push(v.time);
-    }
-    const data = [xAxis, yAxis]
     let opts = {
       title: "40L performance over time",
       id: "40l-over-time-chart",
       width: 800,
       height: 300,
+      axes: [
+        {},
+        {
+          values: (u, vals, space) => vals.map(v => v + 's'),
+        },
+      ],
       series: [
         {
-          label: "Timestamp",
+          label: "Date",
         },
         {
-          // initial toggled state (optional)
           show: true,
-          // in-legend display
           label: "Time",
           value: (self, rawValue) => rawValue + "s",
-
-          // series style
           stroke: "red",
           width: 1,
           drawStyle: null,
         }
       ],
     };
-    let uplot = new uPlot(opts, data, document.getElementById("40l-over-time-container"));
+    let uplot = new uPlot(opts, this.data40lOverTime, document.getElementById("40l-over-time-container"));
   }
 
   render40LOverGamesPlayed() {
     const { spline } = uPlot.paths;
-    const xAxis = [];
-    const yAxis = [];
-    let count = 1;
-    for (const v of this.data) {
-      xAxis.push(count++);
-      yAxis.push(v.time);
-    }
-    const data = [xAxis, yAxis]
     let opts = {
       title: "40L performance over games played",
       id: "40l-over-games-played-chart",
@@ -96,22 +92,21 @@ class Renderer {
         x: {
           time: false,
         },
-        y: {
-          auto: true,
-        }
       },
+      axes: [
+        {},
+        {
+          values: (u, vals, space) => vals.map(v => v + 's'),
+        },
+      ],
       series: [
         {
           label: "Game number",
         },
         {
-          // initial toggled state (optional)
           show: true,
-          // in-legend display
           label: "Time",
           value: (self, rawValue) => rawValue + "s",
-
-          // series style
           stroke: "red",
           width: 1,
           drawStyle: null,
@@ -120,7 +115,7 @@ class Renderer {
       ],
     };
 
-    let uplot = new uPlot(opts, data, document.getElementById("40l-over-games-played-container"));
+    let uplot = new uPlot(opts, this.data40lOverGamesPlayed, document.getElementById("40l-over-games-played-container"));
   }
 }
 
