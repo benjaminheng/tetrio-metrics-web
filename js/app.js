@@ -8,18 +8,22 @@ function onDocumentReady(fn) {
 
 class Renderer {
   constructor() {
-    this.rawData = null;
+    // CSV data
+    this.gamemode40lData = null;
     this.legacyGamemode40lData = null;
+
+    // Chart data
     this.data40lOverTime = [[], []];
+    this.dataPersonalBests = [[], []];
   }
 
   async initGamemode40lData() {
-    this.rawData = await this.getGamemode40lData();
+    this.gamemode40lData = await this.getGamemode40lData();
 
     // Data is sorted by played_at descending. Iterate backwards because we
     // want to display the x-axis in ascending order instead.
-    for (let i=this.rawData.length-1; i>=0; i--) {
-      const v = this.rawData[i];
+    for (let i=this.gamemode40lData.length-1; i>=0; i--) {
+      const v = this.gamemode40lData[i];
       this.data40lOverTime[0].push(v.played_at);
       this.data40lOverTime[1].push(v.time);
     }
@@ -27,7 +31,14 @@ class Renderer {
 
   async initLegacyGamemode40lData() {
     this.legacyGamemode40lData = await this.getLegacyGamemode40lData();
-    console.log("this.legacyGamemode40lData =", this.legacyGamemode40lData);
+    //
+    // Data is sorted by played_at descending. Iterate backwards because we
+    // want to display the x-axis in ascending order instead.
+    for (let i=this.legacyGamemode40lData.length-1; i>=0; i--) {
+      const v = this.legacyGamemode40lData[i];
+      this.dataPersonalBests[0].push(v.played_at);
+      this.dataPersonalBests[1].push(v.time);
+    }
   }
 
   getLegacyGamemode40lData() {
@@ -92,7 +103,7 @@ class Renderer {
       title: "40L performance over time",
       id: "40l-over-time-chart",
       width: 800,
-      height: 300,
+      height: 250,
       scales: {
         x: {
           // evenly spaced distribution
@@ -102,7 +113,7 @@ class Renderer {
       axes: [
         {},
         {
-          values: (u, vals, space) => vals.map(v => v + 's'),
+          values: (u, vals, space) => vals.map(v => this.prettifySeconds(v)),
         },
       ],
       series: [
@@ -112,7 +123,7 @@ class Renderer {
         {
           show: true,
           label: "Time",
-          value: (self, rawValue) => rawValue + "s",
+          value: (self, rawValue) => this.prettifySeconds(rawValue),
           stroke: "red",
           width: 1,
           drawStyle: null,
@@ -123,17 +134,61 @@ class Renderer {
     let uplot = new uPlot(opts, this.data40lOverTime, document.getElementById("40l-over-time-container"));
   }
 
+  renderPersonalBests() {
+    const { stepped } = uPlot.paths;
+    let opts = {
+      title: "40L personal bests",
+      id: "40l-personal-bests-chart",
+      width: 800,
+      height: 250,
+      axes: [
+        {},
+        {
+          values: (u, vals, space) => vals.map(v => this.prettifySeconds(v)),
+          size: 60,
+        },
+      ],
+      series: [
+        {
+          label: "Date",
+        },
+        {
+          show: true,
+          label: "Time",
+          value: (self, rawValue) => this.prettifySeconds(rawValue),
+          stroke: "red",
+          width: 1,
+          drawStyle: null,
+          paths: stepped({align: 1}),
+        }
+      ],
+    };
+    let uplot = new uPlot(opts, this.dataPersonalBests, document.getElementById("40l-personal-bests-container"));
+  }
+
   renderTotalGamesPlayed() {
-    document.getElementById("total-games-played").innerHTML = this.rawData.length;
+    document.getElementById("total-games-played").innerHTML = this.gamemode40lData.length;
+  }
+
+  prettifySeconds(seconds) {
+    if (seconds <= 60) {
+      return `${seconds}s`
+    }
+    const minutes = Math.floor(seconds / 60);
+    const remainderSeconds = parseFloat((seconds % 60).toFixed(2));
+    return `${minutes}m${remainderSeconds}s`
   }
 }
 
 async function main() {
   const renderer = new Renderer();
-  await renderer.initGamemode40lData();
-  renderer.render40LOverTime();
-  renderer.renderTotalGamesPlayed();
-  await renderer.initLegacyGamemode40lData();
+  await renderer.initGamemode40lData().then(() => {
+    renderer.render40LOverTime();
+    renderer.renderTotalGamesPlayed();
+  });
+  await renderer.initLegacyGamemode40lData().then(() => {
+    renderer.renderPersonalBests();
+  });
 }
 
 onDocumentReady(main)
