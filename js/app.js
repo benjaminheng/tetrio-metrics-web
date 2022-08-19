@@ -15,11 +15,15 @@ class Renderer {
 
   async initData() {
     this.rawData = await this.getGamemode40lData();
-    for (let i=0; i<this.rawData.length; i++) {
+
+    let count = 1;
+    // Data is sorted by played_at descending. Iterate backwards because we
+    // want to display the x-axis in ascending order instead.
+    for (let i=this.rawData.length-1; i>=0; i--) {
       const v = this.rawData[i];
       this.data40lOverTime[0].push(v.played_at);
       this.data40lOverTime[1].push(v.time);
-      this.data40lOverGamesPlayed[0].push(i+1);
+      this.data40lOverGamesPlayed[0].push(count++);
       this.data40lOverGamesPlayed[1].push(v.time);
     }
   }
@@ -53,11 +57,18 @@ class Renderer {
   }
 
   render40LOverTime() {
+    const { spline } = uPlot.paths;
     let opts = {
       title: "40L performance over time",
       id: "40l-over-time-chart",
       width: 800,
       height: 300,
+      scales: {
+        x: {
+          // evenly spaced distribution
+          distr: 2,
+        },
+      },
       axes: [
         {},
         {
@@ -75,6 +86,7 @@ class Renderer {
           stroke: "red",
           width: 1,
           drawStyle: null,
+          paths: spline(),
         }
       ],
     };
