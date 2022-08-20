@@ -163,9 +163,8 @@ class Renderer {
   }
 
   renderPersonalBestsChart() {
-    const { stepped } = uPlot.paths;
     let opts = {
-      title: "40L personal bests over time",
+      title: "40L personal bests",
       id: "40l-personal-bests-chart",
       width: 600,
       height: 250,
@@ -187,7 +186,6 @@ class Renderer {
           stroke: "red",
           width: 1,
           drawStyle: null,
-          paths: stepped({align: 1}),
         }
       ],
     };
