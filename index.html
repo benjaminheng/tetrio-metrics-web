@@ -8,30 +8,32 @@
     <script src="js/app.js"></script>
   </head>
   <body>
-    <div id="40l-over-time-container" class="chart-container">Loading...</div>
+    <main>
+      <div id="40l-over-time-container" class="chart-container">Loading...</div>
 
-    <div class="row">
-      <div class="col top-10-table-container">
-        <div class="u-title">40L top 10 games</div>
-        <table id="top-10-table">
-          <thead> <tr> <th>Date</th> <th>Time</th> </tr> </thead>
-          <tbody>
-          </tbody>
-        </table>
+      <div class="row">
+        <div class="col top-10-table-container">
+          <div class="u-title">40L top 10 games</div>
+          <table id="top-10-table">
+            <thead> <tr> <th>Date</th> <th>Time</th> </tr> </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+        <div class="col">
+          <div id="40l-personal-bests-container" class="chart-container">Loading...</div>
+        </div>
       </div>
-      <div class="col">
-        <div id="40l-personal-bests-container" class="chart-container">Loading...</div>
-      </div>
-    </div>
 
-    <p>Data collected since <strong>2022-08-18</strong>. Total games played: <strong><span id="total-games-played"></span></strong>.</p>
+      <p>Data collected since <strong>2022-08-18</strong>. Total games played: <strong><span id="total-games-played"></span></strong>.</p>
 
-    <details>
-      <summary>What are these statistics?</summary>
-      <p>This page shows my Tetris statistics. I mainly play on <a href="https://tetr.io">tetr.io</a> and my profile can be found <a href="https://ch.tetr.io/u/wqwqwq">here</a>. The data on this page is collected by <a href="https://github.com/benjaminheng/tetrio-metrics">tetrio-metrics</a>, a program I wrote. I use this data to visualize my improvement over time.</p>
-      <p>40L, also known as a 40 line sprint, is a game mode in Tetris where
-      the goal is to clear 40 lines as fast as possible. The 40L game mode is
-      commonly used as a measure of a player's speed.</p>
-    </details>
+      <details>
+        <summary>What are these statistics?</summary>
+        <p>This page shows my Tetris statistics. I mainly play on <a href="https://tetr.io">tetr.io</a> and my profile can be found <a href="https://ch.tetr.io/u/wqwqwq">here</a>. The data on this page is collected by <a href="https://github.com/benjaminheng/tetrio-metrics">tetrio-metrics</a>, a program I wrote. I use this data to visualize my improvement over time.</p>
+        <p>40L, also known as a 40 line sprint, is a game mode in Tetris where
+        the goal is to clear 40 lines as fast as possible. The 40L game mode is
+        commonly used as a measure of a player's speed.</p>
+      </details>
+    </main>
   </body>
 </html>
