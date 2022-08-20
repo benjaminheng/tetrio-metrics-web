@@ -15,6 +15,7 @@ class Renderer {
     // Chart data
     this.data40lOverTime = [[], []];
     this.dataPersonalBests = [[], []];
+    this.data40lPerformanceDistribution = [[], []];
 
     // Other derived data
     this.top10Times = [];
@@ -32,9 +33,45 @@ class Renderer {
     }
 
     // Compute top 10 times
-    const gamemode40lDataClone = [...this.gamemode40lData];
-    gamemode40lDataClone.sort((a, b) => a.time - b.time);
-    this.top10Times = gamemode40lDataClone.slice(0, 10);
+    const sortedGamemode40lData = [...this.gamemode40lData];
+    sortedGamemode40lData.sort((a, b) => a.time - b.time);
+    this.top10Times = sortedGamemode40lData.slice(0, 10);
+
+    // Compute 40L histogram data
+    this.compute40lHistogramData(sortedGamemode40lData);
+  }
+
+  compute40lHistogramData(sortedGamemode40lData) {
+    if (sortedGamemode40lData.length === 0) {
+      return
+    }
+    const today = new Date();
+    const dateThreshold = (24*60*60*1000) * 90; // 3 months in milliseconds
+
+    // Initialize buckets
+    const min = parseInt(sortedGamemode40lData[0].time);
+    let max = parseInt(sortedGamemode40lData[sortedGamemode40lData.length-1].time);
+    if (max > 75) {
+      max = 75;
+    }
+    const numBuckets = max-min+1
+    const bucketValues = Array.from({length: numBuckets}, () => 0)
+    const buckets = Array.from({length: numBuckets}, (_, i) => i+min)
+
+    // Build chart data
+    let currentBucket = min;
+    for (const v of sortedGamemode40lData) {
+      if (v.time > max) {
+        // Set upper bound on our histogram
+        continue;
+      } else if (today - (v.played_at*1000) > dateThreshold) {
+        // Filter for games in the last 3 months
+        continue
+      }
+      const bucketIndex = parseInt(v.time) - min;
+      bucketValues[bucketIndex]++;
+    }
+    this.data40lPerformanceDistribution = [buckets, bucketValues];
   }
 
   async initLegacyGamemode40lData() {
@@ -195,6 +232,55 @@ class Renderer {
     let uplot = new uPlot(opts, this.dataPersonalBests, document.getElementById("40l-personal-bests-container"));
   }
 
+  render40LPerformanceDistribution() {
+    const { bars } = uPlot.paths;
+    let opts = {
+      title: "40L performance distribution",
+      id: "40l-performance-distribution-chart",
+      width: 800,
+      height: 250,
+      scales: {
+        x: {
+          time: false,
+          auto: false,
+        },
+      },
+      axes: [
+        {
+          values: (u, vals, space) => vals.map(v => v + "s"),
+        },
+        {},
+      ],
+      series: [
+        {
+          label: "Time",
+          value: (self, rawValue) => rawValue + "s",
+        },
+        {
+          show: true,
+          label: "Count",
+          stroke: "red",
+          points: {
+            show: false,
+          },
+          fill: "rgba(255,0,0,0.3)",
+          stroke: "rgba(255,0,0,1)",
+          width: 1,
+          drawStyle: null,
+          paths: bars({
+            align: 1,
+            size: [1, Infinity],
+            gap: 4}
+          ),
+        }
+      ],
+    };
+
+    // Remove loading indicator before rendering
+    document.getElementById("40l-performance-distribution-container").innerHTML = "";
+    let uplot = new uPlot(opts, this.data40lPerformanceDistribution, document.getElementById("40l-performance-distribution-container"));
+  }
+
   renderTotalGamesPlayed() {
     document.getElementById("total-games-played").innerHTML = this.gamemode40lData.length;
   }
@@ -240,6 +326,7 @@ async function main() {
     renderer.render40LOverTimeChart();
     renderer.renderTotalGamesPlayed();
     renderer.renderTop10Table();
+    renderer.render40LPerformanceDistribution();
   });
   await renderer.initLegacyGamemode40lData().then(() => {
     renderer.renderPersonalBestsChart();
