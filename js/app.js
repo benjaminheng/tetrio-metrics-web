@@ -235,7 +235,7 @@ class Renderer {
   render40LPerformanceDistribution() {
     const { bars } = uPlot.paths;
     let opts = {
-      title: "40L performance distribution",
+      title: "40L performance distribution (last 90 days)",
       id: "40l-performance-distribution-chart",
       width: 800,
       height: 250,
