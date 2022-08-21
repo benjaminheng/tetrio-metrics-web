@@ -89,7 +89,7 @@ class Renderer {
         this.dataPersonalBests[0].push(v.played_at);
         this.dataPersonalBests[1].push(v.time);
       }
-      best = this.legacyGamemode40lData[0];
+      best = this.legacyGamemode40lData[0].time;
     }
 
     // Add personal bests from collected data using tetrio-metrics.
