@@ -15,7 +15,7 @@ class Renderer {
     // Chart data
     this.data40lOverTime = [[], []];
     this.dataPersonalBests = [[], []];
-    this.data40lPerformanceDistribution = [[], []];
+    this.data40lPerformanceDistribution = [[], [], []];
 
     // Other derived data
     this.top10Times = [];
@@ -38,10 +38,10 @@ class Renderer {
     this.top10Times = sortedGamemode40lData.slice(0, 10);
 
     // Compute 40L histogram data
-    this.compute40lHistogramData(sortedGamemode40lData);
+    this.compute40lPerformanceDistributionData(sortedGamemode40lData);
   }
 
-  compute40lHistogramData(sortedGamemode40lData) {
+  compute40lPerformanceDistributionData(sortedGamemode40lData) {
     if (sortedGamemode40lData.length === 0) {
       return
     }
@@ -56,6 +56,7 @@ class Renderer {
     }
     const numBuckets = max-min+1
     const bucketValues = Array.from({length: numBuckets}, () => 0)
+    const percentileValues = Array.from({length: numBuckets}, () => 0)
     const buckets = Array.from({length: numBuckets}, (_, i) => i+min)
 
     // Build chart data
@@ -71,7 +72,18 @@ class Renderer {
       const bucketIndex = parseInt(v.time) - min;
       bucketValues[bucketIndex]++;
     }
-    this.data40lPerformanceDistribution = [buckets, bucketValues];
+
+    // Build percentile data
+    let accumulatedCount = 0;
+    const totalGames = sortedGamemode40lData.length;
+    for (let i=0; i<bucketValues.length; i++) {
+      const v = bucketValues[i];
+      accumulatedCount += v;
+      const percentile = (1 - (accumulatedCount / totalGames)) * 100;
+      percentileValues[i] = percentile;
+    }
+
+    this.data40lPerformanceDistribution = [buckets, bucketValues, percentileValues];
   }
 
   async initLegacyGamemode40lData() {
@@ -244,12 +256,31 @@ class Renderer {
           time: false,
           auto: false,
         },
+        "%": {
+          auto: false,
+          range: [0, 100],
+        },
       },
       axes: [
         {
           values: (u, vals, space) => vals.map(v => v + "s"),
+          width: 1,
         },
-        {},
+        {
+          scale: "count",
+          width: 1,
+        },
+        {
+          // show: false,
+          scale: "%",
+          side: 1,
+          grid: {
+            show: false,
+          },
+          values: (u, vals, space) => vals.map(v => +v.toFixed(1) + "%"),
+          label: "Percentile",
+          width: 1,
+        },
       ],
       series: [
         {
@@ -258,6 +289,7 @@ class Renderer {
         },
         {
           show: true,
+          scale: "count",
           label: "Count",
           stroke: "red",
           points: {
@@ -272,6 +304,16 @@ class Renderer {
             size: [1, Infinity],
             gap: 4}
           ),
+        },
+        {
+          show: true,
+          scale: "%",
+          label: "Percentile",
+          stroke: "blue",
+          points: {
+            show: false,
+          },
+          value: (u, v) => v == null ? "-" : v.toFixed(1) + "%",
         }
       ],
     };
