@@ -19,6 +19,11 @@ class Renderer {
 
     // Other derived data
     this.top10Times = [];
+
+    // Colors
+    this.colorPalette = {
+      red: "#FF0000",
+    }
   }
 
   async initGamemode40lData() {
@@ -186,7 +191,8 @@ class Renderer {
           show: true,
           label: "Time",
           value: (self, rawValue) => this.prettifySeconds(rawValue),
-          stroke: "red",
+          stroke: this.colorPalette.red,
+          fill: this.colorPalette.red + "1A",
           width: 1,
           drawStyle: null,
           paths: spline(),
@@ -220,7 +226,8 @@ class Renderer {
           show: true,
           label: "Time",
           value: (self, rawValue) => this.prettifySeconds(rawValue),
-          stroke: "red",
+          stroke: this.colorPalette.red,
+          fill: this.colorPalette.red + "1A",
           width: 1,
           drawStyle: null,
         }
@@ -259,12 +266,11 @@ class Renderer {
         {
           show: true,
           label: "Count",
-          stroke: "red",
           points: {
             show: false,
           },
-          fill: "rgba(255,0,0,0.3)",
-          stroke: "rgba(255,0,0,1)",
+          stroke: this.colorPalette.red,
+          fill: this.colorPalette.red + "4c", // 30% transparency
           width: 1,
           drawStyle: null,
           paths: bars({
