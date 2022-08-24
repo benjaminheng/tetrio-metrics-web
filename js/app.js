@@ -19,6 +19,23 @@ class Renderer {
 
     // Other derived data
     this.top10Times = [];
+
+    // Colors
+    this.colorPalette = {
+      red: "#FF0000",
+    }
+
+    // Updates the default time format from MM/DD to DD/MM.
+    this.timeFormats = [
+      // tick incr          default           year                             month    day                        hour     min                sec       mode
+      [3600 * 24 * 365,   "{YYYY}",         null,                            null,    null,                      null,    null,              null,        1],
+      [3600 * 24 * 28,    "{MMM}",          "\n{YYYY}",                      null,    null,                      null,    null,              null,        1],
+      [3600 * 24,         "{D}/{M}",        "\n{YYYY}",                      null,    null,                      null,    null,              null,        1],
+      [3600,              "{h}{aa}",        "\n{D}/{M}/{YY}",                null,    "\n{D}/{M}",               null,    null,              null,        1],
+      [60,                "{h}:{mm}{aa}",   "\n{D}/{M}/{YY}",                null,    "\n{D}/{M}",               null,    null,              null,        1],
+      [1,                 ":{ss}",          "\n{D}/{M}/{YY} {h}:{mm}{aa}",   null,    "\n{D}/{M} {h}:{mm}{aa}",  null,    "\n{h}:{mm}{aa}",  null,        1],
+      [0.001,             ":{ss}.{fff}",    "\n{D}/{M}/{YY} {h}:{mm}{aa}",   null,    "\n{D}/{M} {h}:{mm}{aa}",  null,    "\n{h}:{mm}{aa}",  null,        1],
+    ];
   }
 
   async initGamemode40lData() {
@@ -185,7 +202,9 @@ class Renderer {
         },
       },
       axes: [
-        {},
+        {
+          values: this.timeFormats,
+        },
         {
           values: (u, vals, space) => vals.map(v => this.prettifySeconds(v)),
         },
@@ -198,7 +217,8 @@ class Renderer {
           show: true,
           label: "Time",
           value: (self, rawValue) => this.prettifySeconds(rawValue),
-          stroke: "red",
+          stroke: this.colorPalette.red,
+          fill: this.colorPalette.red + "1A",
           width: 1,
           drawStyle: null,
           paths: spline(),
@@ -218,7 +238,9 @@ class Renderer {
       width: 600,
       height: 250,
       axes: [
-        {},
+        {
+          values: this.timeFormats,
+        },
         {
           values: (u, vals, space) => vals.map(v => this.prettifySeconds(v)),
           size: 60,
@@ -232,7 +254,8 @@ class Renderer {
           show: true,
           label: "Time",
           value: (self, rawValue) => this.prettifySeconds(rawValue),
-          stroke: "red",
+          stroke: this.colorPalette.red,
+          fill: this.colorPalette.red + "1A",
           width: 1,
           drawStyle: null,
         }
@@ -291,12 +314,11 @@ class Renderer {
           show: true,
           scale: "count",
           label: "Count",
-          stroke: "red",
           points: {
             show: false,
           },
-          fill: "rgba(255,0,0,0.3)",
-          stroke: "rgba(255,0,0,1)",
+          stroke: this.colorPalette.red,
+          fill: this.colorPalette.red + "4c", // 30% transparency
           width: 1,
           drawStyle: null,
           paths: bars({
