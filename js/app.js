@@ -38,10 +38,10 @@ class Renderer {
     this.top10Times = sortedGamemode40lData.slice(0, 10);
 
     // Compute 40L histogram data
-    this.compute40lHistogramData(sortedGamemode40lData);
+    this.compute40lPerformanceDistributionData(sortedGamemode40lData);
   }
 
-  compute40lHistogramData(sortedGamemode40lData) {
+  compute40lPerformanceDistributionData(sortedGamemode40lData) {
     if (sortedGamemode40lData.length === 0) {
       return
     }
