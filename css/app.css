@@ -13,3 +13,7 @@
 main {
     margin-bottom: 5rem;
 }
+
+body > nav {
+    box-shadow: none;
+}

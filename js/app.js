@@ -316,6 +316,21 @@ class Renderer {
     tbody.innerHTML = content;
   }
 
+  renderRecentGamesTable() {
+    const tbody = document.querySelector("table#recent-games-table tbody")
+    let content = "";
+    for (const v of this.gamemode40lData.slice(0, 5000)) {
+      content += `<tr>
+        <td>${this.formatDate(v.played_at)}</td>
+        <td>${v.time.toFixed(3)}</td>
+        <td>${v.finesse_percent.toFixed(2)}%</td>
+        <td>${v.total_pieces}</td>
+        <td>${v.pieces_per_second.toFixed(2)}</td>
+        </tr>`;
+    }
+    tbody.innerHTML = content;
+  }
+
   prettifySeconds(seconds) {
     if (seconds <= 60) {
       return `${seconds}s`
@@ -355,4 +370,9 @@ async function main() {
   });
 }
 
-onDocumentReady(main)
+async function recentPage() {
+  const renderer = new Renderer();
+  await renderer.initGamemode40lData().then(() => {
+    renderer.renderRecentGamesTable();
+  });
+}
