@@ -74,21 +74,22 @@ class Renderer {
     this.top10Times = sortedGamemode40lData.slice(0, 10);
 
     // Compute 40L histogram data
-    this.compute40lPerformanceDistributionData(sortedGamemode40lData);
+    this.compute40lPerformanceDistributionData(this.gamemode40lData.slice(0, 1000));
 
     this.compute40lPercentilesOverGamesPlayed();
   }
 
-  compute40lPerformanceDistributionData(sortedGamemode40lData) {
-    if (sortedGamemode40lData.length === 0) {
+  compute40lPerformanceDistributionData(data) {
+    if (data.length === 0) {
       return
     }
-    const today = new Date();
-    const dateThreshold = (24*60*60*1000) * 90; // 3 months in milliseconds
+
+    data = [...data];
+    data.sort((a, b) => a.time - b.time);
 
     // Initialize buckets
-    const min = parseInt(sortedGamemode40lData[0].time);
-    let max = parseInt(sortedGamemode40lData[sortedGamemode40lData.length-1].time);
+    const min = parseInt(data[0].time);
+    let max = parseInt(data[data.length-1].time);
     if (max > 75) {
       max = 75;
     }
@@ -98,13 +99,10 @@ class Renderer {
 
     // Build chart data
     let currentBucket = min;
-    for (const v of sortedGamemode40lData) {
+    for (const v of data) {
       if (v.time > max) {
         // Set upper bound on our histogram
         continue;
-      } else if (today - (v.played_at*1000) > dateThreshold) {
-        // Filter for games in the last 3 months
-        continue
       }
       const bucketIndex = parseInt(v.time) - min;
       bucketValues[bucketIndex]++;
@@ -314,7 +312,7 @@ class Renderer {
   render40LPerformanceDistribution() {
     const { bars } = uPlot.paths;
     let opts = {
-      title: "40L performance distribution (last 90 days)",
+      title: "40L performance distribution (last 1000 games)",
       id: "40l-performance-distribution-chart",
       width: 800,
       height: 250,
@@ -372,7 +370,7 @@ class Renderer {
       drawStyle: null,
     }
     let opts = {
-      title: "40L percentiles over games played (bucket size = 200 games)",
+      title: "40L percentiles (bucket size = 200 games)",
       id: "40l-percentiles-over-games-played-chart",
       width: 800,
       height: 250,
