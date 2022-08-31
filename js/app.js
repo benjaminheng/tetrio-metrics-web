@@ -320,7 +320,7 @@ class Renderer {
             show: false,
           },
           stroke: this.colorPalette.green,
-          fill: this.colorPalette.green + "1a",
+          fill: this.colorPalette.green + "4c",
           width: 1,
           drawStyle: null,
           paths: bars({
