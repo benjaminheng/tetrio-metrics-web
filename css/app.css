@@ -36,3 +36,8 @@ body > nav {
 table td, table th {
     padding: 0.2em 0.4em;
 }
+
+/* uPlot title */
+.u-title {
+    font-size: 14px;
+}
