@@ -10,9 +10,6 @@ html[data-theme='dark'] {
 .panel {
     background-color: #181b1f;
     border: 1px solid #ccccdc12;
-}
-
-.chart-container {
     margin-bottom: 3rem;
 }
 
