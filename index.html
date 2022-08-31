@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<html data-theme="dark">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,10 +17,13 @@
   </head>
   <body>
     <main>
-      <div id="40l-over-time-container" class="chart-container">Loading...</div>
+      <div class="header">
+        <strong>Personal bests</strong>
+        <hr/>
+      </div>
 
       <div class="row">
-        <div class="col top-10-table-container">
+        <div class="col top-10-table-container panel">
           <div class="u-title">40L top 10 games</div>
           <table id="top-10-table">
             <thead> <tr> <th>Date</th> <th>Time</th> </tr> </thead>
@@ -27,13 +31,25 @@
             </tbody>
           </table>
         </div>
+
         <div class="col">
-          <div id="40l-personal-bests-container" class="chart-container">Loading...</div>
+          <div id="40l-personal-bests-container" class="panel">Loading...</div>
         </div>
       </div>
 
-      <div id="40l-performance-distribution-container" class="chart-container">Loading...</div>
+      <div class="header">
+        <strong>From <em>2022-08-18</em> to <em>now</em></strong>
+        <hr/>
+      </div>
 
+      <div id="40l-over-time-container" class="panel">Loading...</div>
+
+      <div id="40l-performance-distribution-container" class="panel">Loading...</div>
+
+      <div class="header">
+        <strong>About</strong>
+        <hr/>
+      </div>
       <p>Data collected since <strong>2022-08-18</strong>. Total games played: <strong><span id="total-games-played"></span></strong> (<a href="/recent">raw data</a>).</p>
 
       <details>
