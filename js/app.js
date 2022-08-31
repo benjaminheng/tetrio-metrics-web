@@ -16,6 +16,7 @@ class Renderer {
     this.data40lOverTime = [[], []];
     this.dataPersonalBests = [[], []];
     this.data40lPerformanceDistribution = [[], []];
+    this.data40lPercentilesOverTime = [[], [], [], []];
 
     // Other derived data
     this.top10Times = [];
@@ -74,6 +75,8 @@ class Renderer {
 
     // Compute 40L histogram data
     this.compute40lPerformanceDistributionData(sortedGamemode40lData);
+
+    this.compute40lPercentilesOverTimeData();
   }
 
   compute40lPerformanceDistributionData(sortedGamemode40lData) {
@@ -107,6 +110,45 @@ class Renderer {
       bucketValues[bucketIndex]++;
     }
     this.data40lPerformanceDistribution = [buckets, bucketValues];
+  }
+
+  compute40lPercentilesOverTimeData() {
+    // TODO: Change start date to a monday when we have more data
+    const startDate = new Date("2022-08-18");
+    // TODO: Change bucket size to 1 week when we have more data
+    const bucketSizeDays = 3;
+    let currentBucketDateRange = [startDate, this.addDays(startDate, bucketSizeDays)];
+    let currentBucketData = [];
+    debugger;
+    for (let i=this.gamemode40lData.length-1; i>=0; i--) {
+      const v = this.gamemode40lData[i];
+
+      // If current value is outside of the current bucket, process the current
+      // bucket before continuing.
+      if (v.played_at*1000 >= currentBucketDateRange[1]) {
+        debugger;
+        if (currentBucketData.length > 0) {
+          currentBucketData.sort((a, b) => b.time - a.time);
+          const p50Index = parseInt(currentBucketData.length/2);
+          const p95Index = parseInt(currentBucketData.length * 0.95);
+          const p90Index = parseInt(currentBucketData.length * 0.90);
+          const p50 = currentBucketData[p50Index].time;
+          const p90 = currentBucketData[p90Index].time;
+          const p95 = currentBucketData[p95Index].time;
+          this.data40lPercentilesOverTime[0].push(currentBucketDateRange[0]/1000);
+          this.data40lPercentilesOverTime[1].push(currentBucketData[p50Index].time);
+          this.data40lPercentilesOverTime[2].push(currentBucketData[p90Index].time);
+          this.data40lPercentilesOverTime[3].push(currentBucketData[p95Index].time);
+          currentBucketData = [];
+        }
+
+        while (v.played_at*1000 >= currentBucketDateRange[1]) {
+          currentBucketDateRange = [currentBucketDateRange[1], this.addDays(currentBucketDateRange[1], bucketSizeDays)];
+        }
+      }
+      currentBucketData.push(v);
+    }
+    console.log("this.data40lPercentilesOverTime =", this.data40lPercentilesOverTime);
   }
 
   async initLegacyGamemode40lData() {
@@ -337,6 +379,57 @@ class Renderer {
     let uplot = new uPlot(opts, this.data40lPerformanceDistribution, document.getElementById("40l-performance-distribution-container"));
   }
 
+  render40LPercentilesOverTimeChart() {
+    const seriesOpts = {
+      value: (self, rawValue) => this.prettifySeconds(rawValue),
+      width: 1,
+      drawStyle: null,
+    }
+    let opts = {
+      title: "40L percentiles over time (3 day aggregation)",
+      id: "40l-percentiles-over-time-chart",
+      width: 800,
+      height: 250,
+      cursor: this.commonConfig.cursor,
+      axes: [
+        {
+          stroke: this.colorPalette.fontColor,
+          values: this.timeFormats,
+          grid: Object.assign(this.commonConfig.grid, {}),
+        },
+        {
+          stroke: this.colorPalette.fontColor,
+          values: (u, vals, space) => vals.map(v => this.prettifySeconds(v)),
+          grid: Object.assign(this.commonConfig.grid, {}),
+        },
+      ],
+      series: [
+        {
+          label: "Date",
+        },
+        Object.assign({
+          label: "P50",
+          stroke: this.colorPalette.green,
+          fill: this.colorPalette.green + "1a",
+        }, seriesOpts),
+        Object.assign({
+          label: "P90",
+          stroke: this.colorPalette.blue,
+          fill: this.colorPalette.blue + "1a",
+        }, seriesOpts),
+        Object.assign({
+          label: "P95",
+          stroke: this.colorPalette.orange,
+          fill: this.colorPalette.orange + "1a",
+        }, seriesOpts),
+      ],
+    };
+
+    // Remove loading indicator before rendering
+    document.getElementById("40l-percentiles-over-time-container").innerHTML = "";
+    let uplot = new uPlot(opts, this.data40lPercentilesOverTime, document.getElementById("40l-percentiles-over-time-container"));
+  }
+
   renderTotalGamesPlayed() {
     document.getElementById("total-games-played").innerHTML = this.gamemode40lData.length;
   }
@@ -389,6 +482,13 @@ class Renderer {
       + ("0" + d.getMinutes()).slice(-2)
     );
   }
+
+  addDays(date, days) {
+    let newDate = new Date(date.valueOf());
+    newDate.setDate(date.getDate() + days);
+    return newDate;
+  }
+
 }
 
 async function main() {
@@ -398,6 +498,7 @@ async function main() {
     renderer.renderTotalGamesPlayed();
     renderer.renderTop10Table();
     renderer.render40LPerformanceDistribution();
+    renderer.render40LPercentilesOverTimeChart();
   });
   await renderer.initLegacyGamemode40lData().then(() => {
     renderer.renderPersonalBestsChart();
