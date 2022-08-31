@@ -23,6 +23,10 @@ class Renderer {
     // Colors
     this.colorPalette = {
       red: "#f2495c",
+      blue: "#5794f2",
+      teal: "#64b0c8",
+      orange: "#e0752d",
+      green: "#629e51",
       fontColor: "#ccccdc",
     }
 
@@ -224,8 +228,8 @@ class Renderer {
           show: true,
           label: "Time",
           value: (self, rawValue) => this.prettifySeconds(rawValue),
-          stroke: this.colorPalette.red,
-          fill: this.colorPalette.red + "1a",
+          stroke: this.colorPalette.green,
+          fill: this.colorPalette.green + "1a",
           width: 1,
           drawStyle: null,
           paths: spline(),
@@ -266,8 +270,8 @@ class Renderer {
           show: true,
           label: "Time",
           value: (self, rawValue) => this.prettifySeconds(rawValue),
-          stroke: this.colorPalette.red,
-          fill: this.colorPalette.red + "1a",
+          stroke: this.colorPalette.green,
+          fill: this.colorPalette.green + "1a",
           width: 1,
           drawStyle: null,
         }
@@ -315,8 +319,8 @@ class Renderer {
           points: {
             show: false,
           },
-          stroke: this.colorPalette.red,
-          fill: this.colorPalette.red + "1a",
+          stroke: this.colorPalette.green,
+          fill: this.colorPalette.green + "1a",
           width: 1,
           drawStyle: null,
           paths: bars({
