@@ -115,19 +115,19 @@ class Renderer {
   compute40lPercentilesOverTimeData() {
     // TODO: Change start date to a monday when we have more data
     const startDate = new Date("2022-08-18");
-    // TODO: Change bucket size to 1 week when we have more data
-    const bucketSizeDays = 3;
-    let currentBucketDateRange = [startDate, this.addDays(startDate, bucketSizeDays)];
+    // TODO: Change days to 1 week when we have more data
+    const numDaysPerBucket = 3;
+    // TODO: Increase min bucket size to 200 when we increase numDaysPerBucket 
+    const minBucketSize = 100;
+    let currentBucketDateRange = [startDate, this.addDays(startDate, numDaysPerBucket)];
     let currentBucketData = [];
-    debugger;
     for (let i=this.gamemode40lData.length-1; i>=0; i--) {
       const v = this.gamemode40lData[i];
 
       // If current value is outside of the current bucket, process the current
       // bucket before continuing.
       if (v.played_at*1000 >= currentBucketDateRange[1]) {
-        debugger;
-        if (currentBucketData.length > 0) {
+        if (currentBucketData.length > minBucketSize) {
           currentBucketData.sort((a, b) => b.time - a.time);
           const p50Index = parseInt(currentBucketData.length/2);
           const p95Index = parseInt(currentBucketData.length * 0.95);
@@ -139,11 +139,11 @@ class Renderer {
           this.data40lPercentilesOverTime[1].push(currentBucketData[p50Index].time);
           this.data40lPercentilesOverTime[2].push(currentBucketData[p90Index].time);
           this.data40lPercentilesOverTime[3].push(currentBucketData[p95Index].time);
-          currentBucketData = [];
         }
+        currentBucketData = [];
 
         while (v.played_at*1000 >= currentBucketDateRange[1]) {
-          currentBucketDateRange = [currentBucketDateRange[1], this.addDays(currentBucketDateRange[1], bucketSizeDays)];
+          currentBucketDateRange = [currentBucketDateRange[1], this.addDays(currentBucketDateRange[1], numDaysPerBucket)];
         }
       }
       currentBucketData.push(v);
