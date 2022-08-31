@@ -41,3 +41,8 @@ table td, table th {
 .u-title {
     font-size: 14px;
 }
+
+.u-title > .title-subtext {
+    font-weight: 400;
+    color: #ccccdc90;
+}

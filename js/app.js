@@ -60,13 +60,7 @@ class Renderer {
   async initGamemode40lData() {
     this.gamemode40lData = await this.getGamemode40lData();
 
-    // Data is sorted by played_at descending. Iterate backwards because we
-    // want to display the x-axis in ascending order instead.
-    for (let i=this.gamemode40lData.length-1; i>=0; i--) {
-      const v = this.gamemode40lData[i];
-      this.data40lOverTime[0].push(v.played_at);
-      this.data40lOverTime[1].push(v.time);
-    }
+    this.compute40lPerformanceOverTimeData();
 
     // Compute top 10 times
     const sortedGamemode40lData = [...this.gamemode40lData];
@@ -77,6 +71,18 @@ class Renderer {
     this.compute40lPerformanceDistributionData(this.gamemode40lData.slice(0, 1000));
 
     this.compute40lPercentilesOverGamesPlayed();
+  }
+
+  compute40lPerformanceOverTimeData() {
+    const slidingWindowSize = 20;
+    // Data is sorted by played_at descending. Iterate backwards because we
+    // want to display the x-axis in ascending order instead.
+    for (let i=this.gamemode40lData.length-1; i>=0; i--) {
+      const v = this.gamemode40lData[i];
+      this.data40lOverTime[0].push(v.played_at);
+      this.data40lOverTime[1].push(v.time);
+    }
+    this.data40lOverTime[1] = this.movingAverage(this.data40lOverTime[1], slidingWindowSize);
   }
 
   compute40lPerformanceDistributionData(data) {
@@ -223,8 +229,7 @@ class Renderer {
   render40LOverTimeChart() {
     const { spline } = uPlot.paths;
     let opts = {
-      title: "40L performance over time",
-      id: "40l-over-time-chart",
+      id: "chart-40l-over-time",
       width: 800,
       height: 250,
       cursor: this.commonConfig.cursor,
@@ -263,14 +268,12 @@ class Renderer {
       ],
     };
 
-    // Remove loading indicator before rendering
-    document.getElementById("40l-over-time-container").innerHTML = "";
-    let uplot = new uPlot(opts, this.data40lOverTime, document.getElementById("40l-over-time-container"));
+    document.querySelector("div#chart-40l-over-time-container .loading").remove();
+    let uplot = new uPlot(opts, this.data40lOverTime, document.getElementById("chart-40l-over-time-container"));
   }
 
   renderPersonalBestsChart() {
     let opts = {
-      title: "40L personal bests",
       id: "40l-personal-bests-chart",
       width: 600,
       height: 250,
@@ -305,14 +308,13 @@ class Renderer {
     };
 
     // Remove loading indicator before rendering
-    document.getElementById("40l-personal-bests-container").innerHTML = "";
-    let uplot = new uPlot(opts, this.dataPersonalBests, document.getElementById("40l-personal-bests-container"));
+    document.querySelector("div#chart-40l-personal-bests-container .loading").remove();
+    let uplot = new uPlot(opts, this.dataPersonalBests, document.getElementById("chart-40l-personal-bests-container"));
   }
 
   render40LPerformanceDistribution() {
     const { bars } = uPlot.paths;
     let opts = {
-      title: "40L performance distribution (last 1000 games)",
       id: "40l-performance-distribution-chart",
       width: 800,
       height: 250,
@@ -359,8 +361,8 @@ class Renderer {
     };
 
     // Remove loading indicator before rendering
-    document.getElementById("40l-performance-distribution-container").innerHTML = "";
-    let uplot = new uPlot(opts, this.data40lPerformanceDistribution, document.getElementById("40l-performance-distribution-container"));
+    document.querySelector("div#chart-40l-performance-distribution-container .loading").remove();
+    let uplot = new uPlot(opts, this.data40lPerformanceDistribution, document.getElementById("chart-40l-performance-distribution-container"));
   }
 
   render40LPercentilesOverGamesPlayed() {
@@ -370,8 +372,7 @@ class Renderer {
       drawStyle: null,
     }
     let opts = {
-      title: "40L percentiles (bucket size = 200 games)",
-      id: "40l-percentiles-over-games-played-chart",
+      id: "chart-40l-percentiles-over-games-played",
       width: 800,
       height: 250,
       cursor: this.commonConfig.cursor,
@@ -416,8 +417,8 @@ class Renderer {
     };
 
     // Remove loading indicator before rendering
-    document.getElementById("40l-percentiles-over-games-played-container").innerHTML = "";
-    let uplot = new uPlot(opts, this.data40lPercentilesOverGamesPlayed, document.getElementById("40l-percentiles-over-games-played-container"));
+    document.querySelector("div#chart-40l-percentiles-over-games-played-container .loading").remove();
+    let uplot = new uPlot(opts, this.data40lPercentilesOverGamesPlayed, document.getElementById("chart-40l-percentiles-over-games-played-container"));
   }
 
   renderTotalGamesPlayed() {
@@ -479,6 +480,25 @@ class Renderer {
     return newDate;
   }
 
+  movingAverage(data, windowSize) {
+    const rolled = Array(data.length).fill(null);
+    let sum = 0;
+    let count = 0;
+
+    for (let i = 0; i < data.length; i++) {
+      const y = data[i];
+      if (y == null)
+        continue;
+      sum += y;
+      count++;
+      if (i > windowSize - 1) {
+        sum -= data[i - windowSize];
+        count--;
+      }
+      rolled[i] = (sum / count).toFixed(2);
+    }
+    return rolled;
+  }
 }
 
 async function main() {
