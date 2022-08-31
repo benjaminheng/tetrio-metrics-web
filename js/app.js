@@ -22,7 +22,21 @@ class Renderer {
 
     // Colors
     this.colorPalette = {
-      red: "#FF0000",
+      red: "#f2495c",
+      fontColor: "#ccccdc",
+    }
+
+    // Common chart configs
+    this.commonConfig = {
+      grid: {
+        stroke: "#2c3235",
+        width: 1 / devicePixelRatio,
+      },
+      cursor: {
+        points: {
+          size:   (u, seriesIdx)       => u.series[seriesIdx].points.size * 1.2,
+        },
+      }
     }
 
     // Updates the default time format from MM/DD to DD/MM.
@@ -183,6 +197,7 @@ class Renderer {
       id: "40l-over-time-chart",
       width: 800,
       height: 250,
+      cursor: this.commonConfig.cursor,
       scales: {
         x: {
           // evenly spaced distribution
@@ -191,10 +206,14 @@ class Renderer {
       },
       axes: [
         {
+          stroke: this.colorPalette.fontColor,
           values: this.timeFormats,
+          grid: Object.assign(this.commonConfig.grid, {}),
         },
         {
+          stroke: this.colorPalette.fontColor,
           values: (u, vals, space) => vals.map(v => this.prettifySeconds(v)),
+          grid: Object.assign(this.commonConfig.grid, {}),
         },
       ],
       series: [
@@ -206,7 +225,7 @@ class Renderer {
           label: "Time",
           value: (self, rawValue) => this.prettifySeconds(rawValue),
           stroke: this.colorPalette.red,
-          fill: this.colorPalette.red + "1A",
+          fill: this.colorPalette.red + "1a",
           width: 1,
           drawStyle: null,
           paths: spline(),
@@ -225,13 +244,18 @@ class Renderer {
       id: "40l-personal-bests-chart",
       width: 600,
       height: 250,
+      cursor: this.commonConfig.cursor,
       axes: [
         {
+          stroke: this.colorPalette.fontColor,
           values: this.timeFormats,
+          grid: Object.assign(this.commonConfig.grid, {}),
         },
         {
+          stroke: this.colorPalette.fontColor,
           values: (u, vals, space) => vals.map(v => this.prettifySeconds(v)),
           size: 60,
+          grid: Object.assign(this.commonConfig.grid, {}),
         },
       ],
       series: [
@@ -243,7 +267,7 @@ class Renderer {
           label: "Time",
           value: (self, rawValue) => this.prettifySeconds(rawValue),
           stroke: this.colorPalette.red,
-          fill: this.colorPalette.red + "1A",
+          fill: this.colorPalette.red + "1a",
           width: 1,
           drawStyle: null,
         }
@@ -262,6 +286,7 @@ class Renderer {
       id: "40l-performance-distribution-chart",
       width: 800,
       height: 250,
+      cursor: this.commonConfig.cursor,
       scales: {
         x: {
           time: false,
@@ -270,9 +295,14 @@ class Renderer {
       },
       axes: [
         {
+          stroke: this.colorPalette.fontColor,
           values: (u, vals, space) => vals.map(v => v + "s"),
+          grid: Object.assign(this.commonConfig.grid, {}),
         },
-        {},
+        {
+          stroke: this.colorPalette.fontColor,
+          grid: Object.assign(this.commonConfig.grid, {}),
+        },
       ],
       series: [
         {
@@ -286,7 +316,7 @@ class Renderer {
             show: false,
           },
           stroke: this.colorPalette.red,
-          fill: this.colorPalette.red + "4c", // 30% transparency
+          fill: this.colorPalette.red + "1a",
           width: 1,
           drawStyle: null,
           paths: bars({
