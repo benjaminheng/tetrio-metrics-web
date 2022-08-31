@@ -21,6 +21,10 @@ html[data-theme='dark'] {
     margin-top: 0.2em;
 }
 
+.header {
+    margin-bottom: 0.5rem;
+}
+
 main {
     margin-bottom: 5rem;
 }
