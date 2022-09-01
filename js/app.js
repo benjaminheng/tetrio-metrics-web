@@ -117,27 +117,40 @@ class Renderer {
   }
 
   compute40lPercentilesOverGamesPlayed() {
-    const bucketSize = 200;
-    let currentBucketData = [];
-    let gamesPlayed = 0;
+    const windowSize = 200;
+    const win = Array(windowSize).fill(null);
+    let windowPointer = 0;
+
+    let numGames = 1;
     for (let i=this.gamemode40lData.length-1; i>=0; i--) {
       const v = this.gamemode40lData[i];
-      currentBucketData.push(v);
-      if (currentBucketData.length >= bucketSize) {
-        gamesPlayed += currentBucketData.length
-        currentBucketData.sort((a, b) => b.time - a.time);
-        const p50Index = parseInt(currentBucketData.length/2);
-        const p95Index = parseInt(currentBucketData.length * 0.95);
-        const p90Index = parseInt(currentBucketData.length * 0.90);
-        const p50 = currentBucketData[p50Index].time;
-        const p90 = currentBucketData[p90Index].time;
-        const p95 = currentBucketData[p95Index].time;
-        this.data40lPercentilesOverGamesPlayed[0].push(gamesPlayed);
-        this.data40lPercentilesOverGamesPlayed[1].push(currentBucketData[p50Index].time);
-        this.data40lPercentilesOverGamesPlayed[2].push(currentBucketData[p90Index].time);
-        this.data40lPercentilesOverGamesPlayed[3].push(currentBucketData[p95Index].time);
-        currentBucketData = [];
+      win[windowPointer] = v.time
+
+      // Move the pointer
+      if (windowPointer == windowSize-1) {
+        windowPointer = 0;
+      } else {
+        windowPointer++;
       }
+
+      // Before calculating the percentiles, we first:
+      // 1. Verify that window is filled
+      // 2. Only calculate percentiles every 10 games, for performance
+      if (numGames >= windowSize && numGames % 10 === 0) {
+        const sortedWindow = [...win]
+        sortedWindow.sort((a, b) => b - a);
+        const p50Index = parseInt(sortedWindow.length/2);
+        const p95Index = parseInt(sortedWindow.length * 0.95);
+        const p90Index = parseInt(sortedWindow.length * 0.90);
+        const p50 = sortedWindow[p50Index];
+        const p90 = sortedWindow[p90Index];
+        const p95 = sortedWindow[p95Index];
+        this.data40lPercentilesOverGamesPlayed[0].push(numGames);
+        this.data40lPercentilesOverGamesPlayed[1].push(sortedWindow[p50Index]);
+        this.data40lPercentilesOverGamesPlayed[2].push(sortedWindow[p90Index]);
+        this.data40lPercentilesOverGamesPlayed[3].push(sortedWindow[p95Index]);
+      }
+      numGames++
     }
   }
 
