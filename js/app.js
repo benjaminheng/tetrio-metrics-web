@@ -20,6 +20,7 @@ class Renderer {
 
     // Other derived data
     this.top10Times = [];
+    this.estimatedTotalHoursPlayed = 0;
 
     // Colors
     this.colorPalette = {
@@ -71,6 +72,41 @@ class Renderer {
     this.compute40lPerformanceDistributionData(this.gamemode40lData.slice(0, 1000));
 
     this.compute40lPercentilesOverGamesPlayed();
+
+    this.computeEstimatedTotalTimePlayed();
+  }
+
+  computeEstimatedTotalTimePlayed() {
+    const threshold = 5 * 60 // 5min in seconds
+    let prev = null;
+    let clusterStartTime = null;
+    let totalTimePlayedSeconds = 0;
+
+    // Iterate in ascending order
+    for (let i=this.gamemode40lData.length-1; i>=0; i--) {
+      const curr = this.gamemode40lData[i];
+      if (prev !== null) {
+        // if current time is too far apart from the previous game, then we
+        // end the current cluster
+        if ((curr.played_at - prev.played_at) > threshold) {
+          const clusterEndTime = prev.played_at;
+          totalTimePlayedSeconds += (clusterEndTime - clusterStartTime);
+          clusterStartTime = null;
+        }
+      }
+      prev = curr;
+
+      // start a new cluster if we're not in one yet
+      if (clusterStartTime === null) {
+        const timeTakenSeconds = Math.floor(curr.time);
+        clusterStartTime = curr.played_at - timeTakenSeconds;
+      }
+    }
+    this.estimatedTotalHoursPlayed = Math.floor(totalTimePlayedSeconds / (60*60));
+  }
+
+  renderEstimatedTotalTimePlayed() {
+    document.getElementById("estimated-time-played").innerHTML = `${this.estimatedTotalHoursPlayed}h`;
   }
 
   compute40lPerformanceOverTimeData() {
@@ -522,6 +558,7 @@ async function main() {
     renderer.renderTop10Table();
     renderer.render40LPerformanceDistribution();
     renderer.render40LPercentilesOverGamesPlayed();
+    renderer.renderEstimatedTotalTimePlayed();
   });
   await renderer.initLegacyGamemode40lData().then(() => {
     renderer.renderPersonalBestsChart();
